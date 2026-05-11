@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Invite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --neon: #00ffe7;
+      --neon2: #ff2d78;
+      --bg: #080b12;
+      --card: #0e1420;
+      --border: rgba(0,255,231,0.18);
+      --text: #e8f0fe;
+      --muted: #7a8aaa;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Animated grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,231,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,231,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: gridMove 20s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(40px); }
+    }
+
+    /* Glow orbs */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,255,231,0.06) 0%, transparent 70%);
+      top: -100px; left: -100px;
+      z-index: 0;
+      animation: orbFloat 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes orbFloat {
+      from { transform: translate(0, 0); }
+      to { transform: translate(80px, 60px); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 90%;
+      max-width: 520px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 36px;
+      box-shadow:
+        0 0 40px rgba(0,255,231,0.07),
+        0 0 80px rgba(0,255,231,0.03),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon), transparent);
+      animation: scanline 3s ease-in-out infinite;
+    }
+
+    @keyframes scanline {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    .tag {
+      display: inline-block;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--neon);
+      text-transform: uppercase;
+      border: 1px solid rgba(0,255,231,0.3);
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      background: rgba(0,255,231,0.05);
+    }
+
+    .game-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(0,255,231,0.4);
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 16px;
+      margin-bottom: 36px;
+      line-height: 1.5;
+    }
+
+    .subtitle span {
+      color: var(--neon);
+      font-weight: 600;
+    }
+
+    /* STEP 1 - Yes/No */
+    #step-choice { display: block; }
+    #step-email { display: none; }
+    #step-no { display: none; }
+    #step-success { display: none; }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      padding: 16px 0;
+      border-radius: 10px;
+      border: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.08);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover::after { opacity: 1; }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-yes {
+      background: linear-gradient(135deg, #00ffe7, #00c4b4);
+      color: #080b12;
+      box-shadow: 0 0 20px rgba(0,255,231,0.3);
+    }
+
+    .btn-yes:hover {
+      box-shadow: 0 0 30px rgba(0,255,231,0.5);
+      transform: translateY(-2px);
+    }
+
+    .btn-no {
+      background: transparent;
+      color: var(--neon2);
+      border: 1px solid rgba(255,45,120,0.4);
+    }
+
+    .btn-no:hover {
+      background: rgba(255,45,120,0.08);
+      border-color: var(--neon2);
+      box-shadow: 0 0 20px rgba(255,45,120,0.2);
+      transform: translateY(-2px);
+    }
+
+    /* Email form */
+    .form-label {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .form-input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .form-input:focus {
+      border-color: var(--neon);
+      box-shadow: 0 0 0 3px rgba(0,255,231,0.1);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #00ffe7, #00c4b4);
+      color: #080b12;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 0 20px rgba(0,255,231,0.3);
+    }
+
+    .btn-submit:hover {
+      box-shadow: 0 0 35px rgba(0,255,231,0.5);
+      transform: translateY(-2px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* No step - game link */
+    .game-link {
+      display: block;
+      margin-top: 20px;
+      padding: 14px 20px;
+      background: rgba(255,45,120,0.08);
+      border: 1px solid rgba(255,45,120,0.3);
+      border-radius: 10px;
+      color: var(--neon2);
+      text-decoration: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .game-link:hover {
+      background: rgba(255,45,120,0.15);
+      box-shadow: 0 0 20px rgba(255,45,120,0.2);
+    }
+
+    /* Success */
+    .success-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: pulse 1.5s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .success-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      color: var(--neon);
+      margin-bottom: 8px;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+
+    .back-btn:hover { color: var(--neon); }
+
+    .error-msg {
+      color: var(--neon2);
+      font-size: 13px;
+      margin-top: -8px;
+      margin-bottom: 12px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+
+    <!-- STEP 1 : Oui / Non -->
+    <div id="step-choice">
+      <div class="tag">🎮 Game Invite</div>
+      <div class="game-name" id="game-title">Chargement...</div>
+      <p class="subtitle">Est-ce que tu veux jouer à <span id="game-subtitle">ce jeu</span> ?</p>
+      <div class="btn-group">
+        <button class="btn btn-yes" onclick="showEmail()">✅ OUI</button>
+        <button class="btn btn-no" onclick="showNo()">❌ NON</button>
+      </div>
+    </div>
+
+    <!-- STEP 2 : Formulaire email -->
+    <div id="step-email">
+      <div class="tag">📧 Inscription</div>
+      <div class="game-name" style="font-size:22px;">Rejoins la partie !</div>
+      <p class="subtitle" style="margin-bottom:24px;">Entre ton email pour recevoir le lien d'installation de <span id="game-email-name">ce jeu</span>.</p>
+      <label class="form-label">Ton email</label>
+      <input type="email" class="form-input" id="email-input" placeholder="exemple@gmail.com" />
+      <p class="error-msg" id="error-msg">⚠️ Entre un email valide.</p>
+      <button class="btn-submit" id="submit-btn" onclick="submitEmail()">ENVOYER LE LIEN →</button>
+      <button class="back-btn" onclick="showChoice()">← Retour</button>
+    </div>
+
+    <!-- STEP 3 : Non → lien du jeu -->
+    <div id="step-no">
+      <div class="tag">🔗 Lien du jeu</div>
+      <div class="game-name" style="font-size:22px;">Pas de souci !</div>
+      <p class="subtitle">Voici où tu peux trouver <span id="game-no-name">ce jeu</span> :</p>
+      <a id="game-no-link" href="#" target="_blank" class="game-link">🔍 RECHERCHER LE JEU →</a>
+      <button class="back-btn" onclick="showChoice()">← Retour</button>
+    </div>
+
+    <!-- STEP 4 : Succès -->
+    <div id="step-success">
+      <div class="success-icon">🎮</div>
+      <div class="success-title">Email envoyé !</div>
+      <p class="subtitle">Vérifie ta boîte mail, le lien d'installation t'a été envoyé. À tout de suite en jeu !</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // =============================================
+  // CONFIGURATION - Modifie ces valeurs
+  // =============================================
+  const MAKE_WEBHOOK_EMAIL = "https://hook.eu1.make.com/TON_WEBHOOK_EMAIL_ICI"; // Webhook Make pour recevoir l'email
+  // =============================================
+
+  // Récupère le nom du jeu depuis l'URL : ?game=Valorant
+  const params = new URLSearchParams(window.location.search);
+  const gameName = params.get('game') || 'ce jeu';
+
+  document.getElementById('game-title').textContent = gameName;
+  document.getElementById('game-subtitle').textContent = gameName;
+  document.getElementById('game-email-name').textContent = gameName;
+  document.getElementById('game-no-name').textContent = gameName;
+  document.getElementById('game-no-link').href = `https://www.google.com/search?q=${encodeURIComponent(gameName + ' télécharger installer')}`;
+
+  function showChoice() {
+    hide(['step-email','step-no','step-success']);
+    show('step-choice');
+  }
+
+  function showEmail() {
+    hide(['step-choice','step-no','step-success']);
+    show('step-email');
+  }
+
+  function showNo() {
+    hide(['step-choice','step-email','step-success']);
+    show('step-no');
+  }
+
+  function hide(ids) {
+    ids.forEach(id => document.getElementById(id).style.display = 'none');
+  }
+
+  function show(id) {
+    document.getElementById(id).style.display = 'block';
+  }
+
+  async function submitEmail() {
+    const email = document.getElementById('email-input').value.trim();
+    const errorMsg = document.getElementById('error-msg');
+    const btn = document.getElementById('submit-btn');
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errorMsg.style.display = 'block';
+      return;
+    }
+
+    errorMsg.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Envoi en cours...';
+
+    try {
+      await fetch(MAKE_WEBHOOK_EMAIL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, game: gameName })
+      });
+    } catch(e) {
+      console.error(e);
+    }
+
+    hide(['step-email']);
+    show('step-success');
+  }
+</script>
+</body>
+</html>
